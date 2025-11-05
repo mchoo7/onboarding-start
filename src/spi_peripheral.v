@@ -16,10 +16,10 @@ module spi_peripheral (
     output  reg [7:0] pwm_duty_cycle
 );
 
-    wire copi, nCS, sclk;
+    wire copi, nCS_posedge, sclk;
 
     assign copi = ui_in[1];
-    assign nCS = ui_in[2];
+    assign nCS_posedge = ui_in[2];
     assign sclk = ui_in[0];
 
     reg [15:0] shift_reg;  // Shift register for incoming data
@@ -30,7 +30,7 @@ module spi_peripheral (
     // 2-stage synchronizers for CDC
     reg sclk_sync1, sclk_sync2, sclk_prev;   // Edge-sensitive: N + 1 samples
     reg copi_sync1, copi_sync2;              // Value-sensitive: N samples
-    reg nCS_sync1, nCS_sync2, nCS_prev;      // Edge-sensitive: N + 1 samples
+    reg nCS_sync1, nCS_sync2;                // Value-sensitive: N samples
 
     // Initialize registers to 0x00 per spec
     initial begin
@@ -50,7 +50,6 @@ module spi_peripheral (
         copi_sync2 = 1'b0;
         nCS_sync1 = 1'b0;
         nCS_sync2 = 1'b0;
-        nCS_prev = 1'b0;
     end
 
     // 2-stage synchronizers for all CDC signals
@@ -63,27 +62,22 @@ module spi_peripheral (
             copi_sync2 <= 1'b0;
             nCS_sync1 <= 1'b0;
             nCS_sync2 <= 1'b0;
-            nCS_prev <= 1'b0;
         end else begin
             // First stage - sample asynchronous inputs
             sclk_sync1 <= sclk;
             copi_sync1 <= copi;
-            nCS_sync1 <= nCS;
+            nCS_sync1 <= nCS_posedge;
 
             // Second stage - reduce metastability
             sclk_sync2 <= sclk_sync1;
             sclk_prev <= sclk_sync2;  // Extra sample for edge detection
             copi_sync2 <= copi_sync1;
             nCS_sync2 <= nCS_sync1;
-            nCS_prev <= nCS_sync2;  // Extra sample for edge detection
         end
     end
 
     // Detect SCLK rising edge (edge-sensitive signal)
     wire sclk_rising_edge = (sclk_sync2 == 1'b1) && (sclk_prev == 1'b0);
-
-    // Detect nCS rising edge (edge-sensitive signal)
-    wire nCS_posedge = (nCS_sync2 == 1'b1) && (nCS_prev == 1'b0);
 
     // Process SPI protocol in the clk domain
     always @(posedge clk or negedge rst_n) begin
