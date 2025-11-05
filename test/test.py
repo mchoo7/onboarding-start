@@ -10,11 +10,11 @@ from cocotb.types import LogicArray
 
 async def await_half_sclk(dut):
     """Wait for the SCLK signal to go high or low."""
-    start_time = cocotb.utils.get_sim_time(unit="ns")
+    start_time = cocotb.utils.get_sim_time(units="ns")
     while True:
         await ClockCycles(dut.clk, 1)
         # Wait for half of the SCLK period (10 us)
-        if (start_time + 100*100*0.5) < cocotb.utils.get_sim_time(unit="ns"):
+        if (start_time + 100*100*0.5) < cocotb.utils.get_sim_time(units="ns"):
             break
     return
 
@@ -88,7 +88,7 @@ async def test_spi(dut):
     dut._log.info("Start SPI test")
 
     # Set the clock period to 100 ns (10 MHz)
-    clock = Clock(dut.clk, 100, unit="ns")
+    clock = Clock(dut.clk, 100, units="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
@@ -152,7 +152,7 @@ async def test_spi(dut):
 @cocotb.test()
 async def test_pwm_freq(dut):
     # Set the clock period to 100 ns (10 MHz)
-    clock = Clock(dut.clk, 100, unit="ns")
+    clock = Clock(dut.clk, 100, units="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
@@ -198,7 +198,7 @@ async def test_pwm_freq(dut):
         await ClockCycles(dut.clk, 1)
         curr_val = (int(dut.uo_out.value) >> 4) & 1
         if prev_val == 0 and curr_val == 1:
-            time_first_edge = cocotb.utils.get_sim_time(unit='ns')
+            time_first_edge = cocotb.utils.get_sim_time(units='ns')
             break
         prev_val = curr_val
         wait_count += 1
@@ -219,7 +219,7 @@ async def test_pwm_freq(dut):
         await ClockCycles(dut.clk, 1)
         curr_val = (int(dut.uo_out.value) >> 4) & 1
         if prev_val == 0 and curr_val == 1:
-            time_second_edge = cocotb.utils.get_sim_time(unit='ns')
+            time_second_edge = cocotb.utils.get_sim_time(units='ns')
             break
         prev_val = curr_val
         wait_count += 1
@@ -243,7 +243,7 @@ async def test_pwm_freq(dut):
 @cocotb.test()
 async def test_pwm_duty(dut):
     # Set the clock period to 100 ns (10 MHz)
-    clock = Clock(dut.clk, 100, unit="ns")
+    clock = Clock(dut.clk, 100, units="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
@@ -299,7 +299,7 @@ async def test_pwm_duty(dut):
             await ClockCycles(dut.clk, 1)
             curr_val = (int(dut.uo_out.value) >> 4) & 1
             if prev_val == 0 and curr_val == 1:
-                t_rising_edge = cocotb.utils.get_sim_time(unit='ns')
+                t_rising_edge = cocotb.utils.get_sim_time(units='ns')
                 break
             prev_val = curr_val
             wait_count += 1
@@ -310,7 +310,7 @@ async def test_pwm_duty(dut):
             await ClockCycles(dut.clk, 1)
             curr_val = (int(dut.uo_out.value) >> 4) & 1
             if curr_val == 0:
-                t_falling_edge = cocotb.utils.get_sim_time(unit='ns')
+                t_falling_edge = cocotb.utils.get_sim_time(units='ns')
                 break
             wait_count += 1
 
@@ -321,7 +321,7 @@ async def test_pwm_duty(dut):
             await ClockCycles(dut.clk, 1)
             curr_val = (int(dut.uo_out.value) >> 4) & 1
             if prev_val == 0 and curr_val == 1:
-                t_next_rising_edge = cocotb.utils.get_sim_time(unit='ns')
+                t_next_rising_edge = cocotb.utils.get_sim_time(units='ns')
                 break
             prev_val = curr_val
             wait_count += 1
