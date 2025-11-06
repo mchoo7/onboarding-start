@@ -10,11 +10,11 @@ from cocotb.types import LogicArray
 
 async def await_half_sclk(dut):
     """Wait for the SCLK signal to go high or low."""
-    start_time = cocotb.utils.get_sim_time(units="ns")
+    start_time = cocotb.utils.get_sim_time(unit="ns")
     while True:
         await ClockCycles(dut.clk, 1)
         # Wait for half of the SCLK period (10 us)
-        if (start_time + 100*100*0.5) < cocotb.utils.get_sim_time(units="ns"):
+        if (start_time + 100*100*0.5) < cocotb.utils.get_sim_time(unit="ns"):
             break
     return
 
@@ -28,7 +28,7 @@ async def send_spi_transaction(dut, r_w, address, data):
     - 1 bit for Read/Write
     - 7 bits for address
     - 8 bits for data
-    
+
     Parameters:
     - r_w: boolean, True for write, False for read
     - address: int, 7-bit address (0-127)
@@ -88,7 +88,7 @@ async def test_spi(dut):
     dut._log.info("Start SPI test")
 
     # Set the clock period to 100 ns (10 MHz)
-    clock = Clock(dut.clk, 100, units="ns")
+    clock = Clock(dut.clk, 100, unit="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
@@ -122,7 +122,7 @@ async def test_spi(dut):
     ui_in_val = await send_spi_transaction(dut, 0, 0x30, 0xBE)
     assert dut.uo_out.value == 0xF0, f"Expected 0xF0, got {dut.uo_out.value}"
     await ClockCycles(dut.clk, 100)
-    
+
     dut._log.info("Read transaction (invalid), address 0x41 (invalid), data 0xEF")
     ui_in_val = await send_spi_transaction(dut, 0, 0x41, 0xEF)
     await ClockCycles(dut.clk, 100)
